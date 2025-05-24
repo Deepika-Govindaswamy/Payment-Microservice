@@ -15,10 +15,11 @@ A Spring Boot-based Payment Microservice that validates incoming payment request
 
 **Tech Stack**
 
-Backend Framework - Spring Boot          
-Messaging Queue   - Apache Kafka         
-Payment Gateway   - Stripe API           
-Database          - PostgreSQL   
-Containerization  - Docker, Docker Compose
-Build Tool        - Maven      
-Language          - Java 17  
+- Frontend - ReactJS & Javascript
+- Backend Framework - Spring Boot          
+- Messaging Queue   - Apache Kafka         
+- Payment Gateway   - Stripe API           
+- Database          - PostgreSQL   
+- Containerization  - Docker, Docker Compose
+- Build Tool        - Maven      
+- Language          - Java 17  
