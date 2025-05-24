@@ -11,7 +11,7 @@ import { Elements } from '@stripe/react-stripe-js';
 
 export default function CollectPaymentDetails () {
 
-    const stripePromise = loadStripe('pk_test_51RECoQHQqjXOU2qoZDXortaBrRL9Mo0CFhmK4vZbApuVG3xBcfxyFie0mCi6SrvAFDOp3GDFRkbIk7m823Jkrv9z00yd8ZkF93');
+    const stripePromise = loadStripe('your stripe public key here');
 
     const total = 145.00;
 
