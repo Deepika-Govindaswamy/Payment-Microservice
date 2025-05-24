@@ -64,7 +64,7 @@ public class KafkaPaymentConsumer {
             PaymentIntent intent = createPaymentIntent(paymentDetails, currentTransaction);
 
             if (intent == null) {
-
+                log.info("Payment intent is null {} ", intent);
                 return;
             }
 
@@ -83,40 +83,6 @@ public class KafkaPaymentConsumer {
 
     }
 
-
-
-
-//    private KafkaPaymentDto savePaymentRecord (KafkaPaymentDto paymentDetails) {
-//
-//        PaymentTransaction existingPaymentRecord = paymentRecordRepository.findByTransactionId(paymentDetails.transactionId());
-//
-//        try {
-//
-//            PaymentTransaction paymentTransaction = existingPaymentRecord;
-//            paymentTransaction.setStatus("Pending");
-//            paymentTransaction.setUpdatedAt(Instant.now());
-//            paymentRecordRepository.save(paymentTransaction);
-//            log.info("Saved payment details: {}", paymentTransaction);
-//         }
-//
-//        catch (Exception e) {
-//           e.printStackTrace();
-//        }
-//
-//
-//        KafkaPaymentDto updatedPaymentRecord = KafkaPaymentDto.builder()
-//                .amount(paymentDetails.amount())
-//                .currency(paymentDetails.currency())
-//                .paymentMethodId(paymentDetails.paymentMethodId())
-//                .idempotencyKey(paymentDetails.idempotencyKey())
-//                .customerEmail(paymentDetails.customerEmail())
-//                .status("Pending")
-//                .transactionId(paymentDetails.transactionId())
-//                .build();
-//
-//        return updatedPaymentRecord;
-//
-//    }
 
     private PaymentIntent createPaymentIntent (KafkaPaymentDto paymentDetails, PaymentTransaction currentTransaction) {
 
@@ -161,15 +127,16 @@ public class KafkaPaymentConsumer {
         }
         catch (StripeException e) {
 
+            log.error("StripeException during createPaymentIntent {} \n {}",e,  e.getMessage());
             currentTransaction.setUpdatedAt(Instant.now());
             currentTransaction.setStatus("FAILED");
             currentTransaction.setFailureReason(e.getStripeError().getMessage());
 //            paymentRecordRepository.save(failedTransaction);
 
-            PaymentFailed failedPayment = PaymentFailed.builder()
-                    .transactionId(paymentDetails.transactionId())
-                    .failureReason(e.getStripeError().getMessage())
-                    .build();
+            PaymentFailed failedPayment = new PaymentFailed(
+                    paymentDetails.transactionId(),
+                    e.getStripeError().getMessage()
+            );
 
             kafkaFailedTemplate.send("payments.failed", failedPayment);
         }
@@ -192,10 +159,10 @@ public class KafkaPaymentConsumer {
 //                paymentRecordRepository.save(currentTransaction);
 
                 // pushing successful transaction to kafka
-                PaymentSuccess successfulPayment = PaymentSuccess.builder()
-                        .transactionId(currentTransaction.getTransactionId())
-                        .stripePaymentIntentId(intent.getId())
-                        .build();
+                PaymentSuccess successfulPayment = new PaymentSuccess(
+                        currentTransaction.getTransactionId(),
+                        intent.getId()
+                );
 
                 kafkaSuccessTemplate.send("payments.success", successfulPayment);
             }
@@ -208,10 +175,10 @@ public class KafkaPaymentConsumer {
 //                paymentRecordRepository.save(currentTransaction);
 
                 // pushing failed transaction to kafka
-                PaymentFailed failedPayment = PaymentFailed.builder()
-                        .transactionId(currentTransaction.getTransactionId())
-                        .failureReason(intent.getStatus())
-                        .build();
+                PaymentFailed failedPayment = new PaymentFailed (
+                        currentTransaction.getTransactionId(),
+                        intent.getStatus()
+                );
 
                 kafkaFailedTemplate.send("payments.failed", failedPayment);
             }

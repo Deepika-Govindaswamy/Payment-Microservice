@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PaymentRecordRepository extends JpaRepository<PaymentTransaction, Long> {
+public interface PaymentRecordRepository extends JpaRepository<PaymentTransaction, String> {
 
-    PaymentTransaction findByTransactionId (String stripePaymentRecord);
+    PaymentTransaction findByTransactionId (String transactionId);
 }
